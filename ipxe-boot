@@ -1,0 +1,13 @@
+
+On kvm Ctrl-B to iPXE menu.
+
+# CTRL-B
+ifconf
+chain http://infra-node1.domain.ru/centos7_x64/centos7-serial.ipxe
+
+centos7-serial.ipxe file content:
+
+#!ipxe
+kernel -n img http://infra-node1.domain.ru/centos7_x64/images/pxeboot/vmlinuz initrd=initrd.img inst.repo=http://infra-node1.domain.ru/centos7_x64 repo.0=http://10.70.106.11/centos7_x64 repo.1=http://10.70.106.11/epel devfs=nomount ks=http://10.70.106.11/centos7_x64/ks-centos7-vm.cfg
+initrd http://infra-node1.domain.ru/centos7_x64/images/pxeboot/initrd.img
+boot img

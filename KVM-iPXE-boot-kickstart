@@ -1,0 +1,68 @@
+
+On kvm Ctrl-B to iPXE menu.
+
+
+iPXE> ifconf
+iPXE> chain http://10.70.106.11/centos7_x64/centos7-serial.ipxe
+
+
+############################################
+
+
+centos7-serial.ipxe file content:
+
+#!ipxe
+kernel -n img http://infra-node1.domain.ru/centos7_x64/images/pxeboot/vmlinuz initrd=initrd.img inst.repo=http://infra-node1.domain.ru/centos7_x64 repo.0=http://10.70.106.11/centos7_x64 repo.1=http://10.70.106.11/epel devfs=nomount ks=http://10.70.106.11/centos7_x64/ks-centos7-vm.cfg
+initrd http://infra-node1.domain.ru/centos7_x64/images/pxeboot/initrd.img
+boot img
+
+
+coreos-serial.ipxe file content:
+
+#!ipxe
+set base-url http://infra-node1.domain.ru/coreos/stable.release.core-os.net/amd64-usr/current
+kernel ${base-url}/coreos_production_pxe.vmlinuz initrd=coreos_production_pxe_image.cpio.gz coreos.first_boot=1 coreos.config.url=http://infra-node1.domain.ru/coreos/pxe-config
+initrd ${base-url}/coreos_production_pxe_image.cpio.gz
+boot
+
+
+
+############################################
+
+
+pxe-config file content???:
+
+
+#cloud-config
+
+coreos:
+  etcd2:
+    # generate a new token for each unique cluster from https://discovery.etcd.io/new?size=3
+    # specify the initial size of your cluster with ?size=X
+    discovery: https://discovery.etcd.io/46247486e3e079f6b499eb5362e8e5bf
+    # multi-region and multi-cloud deployments need to use $public_ipv4
+    advertise-client-urls: http://$private_ipv4:2379,http://$private_ipv4:4001
+    initial-advertise-peer-urls: http://$private_ipv4:2380
+    # listen on both the official ports and the legacy ports
+    # legacy ports can be omitted if your application doesn't depend on them
+    listen-client-urls: http://0.0.0.0:2379,http://0.0.0.0:4001
+    listen-peer-urls: http://$private_ipv4:2380
+  units:
+    - name: etcd2.service
+      command: start
+    - name: fleet.service
+      command: start
+ssh_authorized_keys:
+  - ssh-rsa AAAA...
+
+
+
+Подробно для coreos статьи:
+
+https://dev-ops-notes.ru/docker/coreos-%D0%BA%D0%BB%D0%B0%D1%81%D1%82%D0%B5%D1%80-%D0%B2-%D0%BE%D0%B1%D0%BB%D0%B0%D0%BA%D0%B5-%D0%BA%D1%80%D0%BE%D0%BA/
+
+http://www.yet.org/2016/06/tectonic/
+
+https://coreos.com/os/docs/latest/booting-with-ipxe.html
+
+
